@@ -1,0 +1,8 @@
+//Get The sys_id Of The Record
+    _getRecordID: function(inKey, inValue, inTable) {
+        var getRecord = new GlideRecord(inTable);
+        getRecord.addQuery(inKey, inValue);
+        getRecord.query();
+        if (getRecord.next())
+            return getRecord.sys_id.toString();
+    },
