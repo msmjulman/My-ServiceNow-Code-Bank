@@ -1,0 +1,26 @@
+MANUFACTURER
+
+
+answer = (function transformEntry(source) {
+	var inManufacturer = source.u_manufacturer.toString();
+	var manufacturerID = '';
+	
+	//Check if the Manufacturer exists
+	var getManufacturer = new GlideRecord('core_company');
+	getManufacturer.addEncodedQuery('manufacturer=true^name=' + inManufacturer);
+	getManufacturer.query();
+	
+	if(!getManufacturer.next()) {
+		//Creation of the new Manufacturer
+		getManufacturer.initialize();
+		
+		getManufacturer.name = inManufacturer;
+		getManufacturer.manufacturer = 'true';
+		getManufacturer.notes = 'Import CMDB ' + new GlideDateTime() + ', New Manufacturer create by the Transform MAP';
+
+		manufacturerID = getManufacturer.insert();
+	} else
+		manufacturerID = getManufacturer.sys_id.toString();
+	
+	return manufacturerID;
+})(source);

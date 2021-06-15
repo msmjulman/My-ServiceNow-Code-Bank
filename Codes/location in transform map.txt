@@ -1,0 +1,25 @@
+LOCATION
+
+
+answer = (function transformEntry(source) {
+	var inLocation = source.u_location.toString();
+	var locationID = '';
+	
+	//Check if the Location exists
+	var getLocation = new GlideRecord('cmn_location');
+	getLocation.addEncodedQuery('name='+ inLocation +'^ORfull_name=' + inLocation);
+	getLocation.query();
+	
+	if(!getLocation.next()) {
+		//Creation of the new Location
+		getLocation.initialize();
+		
+		getLocation.name = inLocation;
+		getLocation.street = 'Import CMDB ' + new GlideDateTime() + ', New Location create by the Transform MAP';
+
+		locationID = getLocation.insert();
+	} else
+		locationID = getLocation.sys_id.toString();
+	
+	return locationID;
+})(source);

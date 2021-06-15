@@ -1,0 +1,26 @@
+COMPANY
+
+
+answer = (function transformEntry(source) {
+	var inCompany = source.u_company.toString();
+	var companyID = '';
+	
+	//Check if the Company exists
+	var getCompany = new GlideRecord('core_company');
+	getCompany.addEncodedQuery('customer=true^name=' + inCompany);
+	getCompany.query();
+	
+	if(!getCompany.next()) {
+		//Creation of the new Company
+		getCompany.initialize();
+		
+		getCompany.name = inCompany;
+		getCompany.customer = 'true';
+		getCompany.notes = 'Import CMDB ' + new GlideDateTime() + ', New Company create by the Transform MAP';
+
+		companyID = getCompany.insert();
+	} else
+		companyID = getCompany.sys_id.toString();
+	
+	return companyID;
+})(source);
