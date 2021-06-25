@@ -1,0 +1,52 @@
+====> Model ID (Review)
+
+
+answer = (function transformEntry(source) {
+    //Declaration
+    var modelID = '';
+    var inModel = source.u_model_id.toString();
+    var theBrand = _getBrand(source.u_manufacturer.toString());
+    var cmdbModelCategory = 'c8380489db787c10568a8a5039961955'; //Network Device Model Category
+
+    //Check if the model exists
+    var getModel = new GlideRecord('cmdb_model');
+    getModel.addEncodedQuery('name=' + inModel + '^manufacturer=' + theBrand + '^cmdb_model_category=' + cmdbModelCategory);
+    getModel.query();
+
+    if (!getModel.next()) {
+        //Creation of the new model
+        getModel.initialize();
+        getModel.name = inModel;
+        getModel.status = 'In Production';
+        getModel.model_number = 'YWZ_NON_DEFINI';
+        getModel.manufacturer = theBrand;
+        getModel.cmdb_model_category = cmdbModelCategory;
+        getModel.comments = 'Import CMDB ' + new GlideDateTime() + ' , New Model Create.';
+
+        modelID = getModel.insert();
+    } else
+        modelID = getModel.sys_id.toString();
+    return modelID;
+})(source);
+
+
+function _getBrand(inBrand) {
+    var manufacturerID = '';
+    //Check if the Manufacturer exists
+    var getManufacturer = new GlideRecord('core_company');
+    getManufacturer.addEncodedQuery('manufacturer=true^name=' + inBrand);
+    getManufacturer.query();
+
+    if (!getManufacturer.next()) {
+        //Creation of the new Manufacturer
+        getManufacturer.initialize();
+        getManufacturer.name = inBrand;
+        getManufacturer.manufacturer = 'true';
+        getManufacturer.notes = 'Import CMDB ' + new GlideDateTime() + ', New Manufacturer create by the Transform MAP';
+
+        manufacturerID = getManufacturer.insert();
+    } else
+        manufacturerID = getManufacturer.sys_id.toString();
+	
+    return manufacturerID;
+}

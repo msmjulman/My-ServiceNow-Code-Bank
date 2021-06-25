@@ -1,0 +1,62 @@
+====> Location (Review)
+
+answer = (function transformEntry(source) {
+    //Declaration
+    var locationID = '';
+    var theCompany = '';
+    var targetCompany = '';
+    var inCompany = source.u_company.toString();
+    var inSiteNumber = source.u_location.toString();
+	
+    /*Get The Company*/
+    var getCompany = new GlideRecord('core_company');
+    if (inSiteNumber != '')
+        getCompany.addEncodedQuery('u_site_number=' + inSiteNumber);
+    else if (inCompany != '')
+        getCompany.addEncodedQuery('name=' + inCompany);
+    else
+        return;
+    getCompany.query();
+
+    if (!getCompany.next()) {
+        //Creation of the new Company
+        getCompany.initialize();
+        getCompany.customer = 'true';
+        getCompany.name = inCompany;
+        if (inSiteNumber != '')
+            getCompany.u_site_number = inSiteNumber;
+        getCompany.notes = 'Import CMDB ' + new GlideDateTime() + ', New Company create by the Transform MAP';
+
+        theCompany = getCompany.insert();
+        targetCompany = getCompany.name.toString();
+    } else {
+        theCompany = getCompany.sys_id.toString();
+        targetCompany = getCompany.name.toString();
+    }
+	
+    /*Get the Location*/
+    var getLocation = new GlideRecord('cmn_location');
+    if (inSiteNumber != '')// && theCompany != ''
+        getLocation.addEncodedQuery('company.u_site_number=' + inSiteNumber);// + '^company=' + theCompany
+    else if (theCompany != '')
+        getLocation.addEncodedQuery('company=' + theCompany);
+    else
+        return;
+    getLocation.query();
+
+    if (!getLocation.next()) {
+        //Creation of the new Location
+        getLocation.initialize();
+        if (theCompany != '') {
+            getLocation.company = theCompany;
+            getLocation.name = targetCompany;
+        }
+        if (inSiteNumber != '')
+            getLocation.name = inSiteNumber;
+        getLocation.street = 'Import CMDB ' + new GlideDateTime() + ', New Location create by the Transform MAP.';
+        locationID = getLocation.insert();
+    } else
+        locationID = getLocation.sys_id.toString();
+
+    return locationID;
+})(source);
